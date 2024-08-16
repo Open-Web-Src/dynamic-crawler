@@ -1,0 +1,178 @@
+version: "3.8"
+
+services:
+  flaskapp:
+    build: ./flaskapp
+    # Local limits:
+    mem_limit: 512m
+    cpus: "0.25"
+    container_name: flaskapp_container
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./flaskapp/requirements.txt:/app/requirements.txt
+      - ./flaskapp/src:/app/src
+    env_file:
+      - ./flaskapp/.env
+    networks:
+      local_network:
+        aliases:
+          - flaskapp.app.local
+    # depends_on:
+    #   - mongo
+    restart: always
+
+  reactapp:
+    build: ./reactapp
+    # Local limits:
+    mem_limit: 512m
+    cpus: "0.25"
+    container_name: reactapp_container
+    ports:
+      - "3000:80"
+    volumes:
+      - ./reactapp:/app
+    env_file:
+      - ./reactapp/.env
+    networks:
+      local_network:
+        aliases:
+          - reactapp.app.local
+    depends_on:
+      - flaskapp # Ensure Flask app starts before React app
+    command: ["nginx", "-g", "daemon off;"]
+
+  # mongo:
+  #   image: mongo:latest
+  #   # Local limits:
+  #   mem_limit: 2g
+  #   cpus: "2.0"
+  #   container_name: mongo_container
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - ./mongo_data:/data/db
+  #   networks:
+  #     local_network:
+  #       aliases:
+  #         - mongodb.app.local
+  #   restart: always # Auto-restart setting
+
+  crawler_main:
+    build: ./scrapy_rt
+    # Local limits:
+    mem_limit: 512m
+    cpus: "0.25"
+    container_name: crawler_main_container
+    ports:
+      - "9080:9080"
+    volumes:
+      - ./scrapy_rt/scrapy.cfg:/app/scrapy.cfg
+      - ./scrapy_rt/requirements.txt:/app/requirements.txt
+      - ./scrapy_rt/logs:/app/logs
+      - ./scrapy_rt/.scrapy:/app/.scrapy
+      - ./scrapy_rt/scrapy_rt:/app/scrapy_rt
+      - ./scrapy_rt/scheduler:/app/scheduler
+    env_file:
+      - ./scrapy_rt/.env
+    networks:
+      local_network:
+        aliases:
+          - crawler_main.app.local
+    depends_on:
+      - redis
+      - selenium
+      # - mongo
+
+  selenium:
+    image: selenium/standalone-firefox:latest
+    # Local limits:
+    mem_limit: 512m
+    cpus: "0.25"
+    container_name: selenium_container
+    ports:
+      - "4444:4444"
+      - "7900:7900"
+    shm_size: 2g
+    networks:
+      local_network:
+        aliases:
+          - selenium.app.local
+
+  redis:
+    image: redis:latest
+    # Local limits:
+    mem_limit: 512m
+    cpus: "0.25"
+    container_name: redis_container
+    networks:
+      local_network:
+        aliases:
+          - redis.app.local
+
+  log_redis_queue:
+    build: ./redis_monitoring
+    # Local limits:
+    mem_limit: 512m
+    cpus: "0.25"
+    container_name: log_redis_queue_container
+    depends_on:
+      - redis
+    volumes:
+      - ./redis_monitoring/src:/app/src
+      - ./redis_monitoring/metrics:/app/metrics
+    env_file:
+      - ./redis_monitoring/.env
+    networks:
+      local_network:
+        aliases:
+          - log_redis_queue.app.local
+
+  auto_scaler:
+    build:
+      context: ./redis_monitoring
+      dockerfile: Dockerfile.auto-scaler
+    # Local limits:
+    mem_limit: 512m
+    cpus: "0.25"
+    container_name: auto_scaler_container
+    volumes:
+      - ./redis_monitoring/src:/app/src
+      - ./redis_monitoring/metrics:/app/metrics
+      - /var/run/docker.sock:/var/run/docker.sock # Optional: Share the Docker socket with the host
+      - ./scrapy_rt/.env:/app/.scrapy.env
+    env_file:
+      - ./redis_monitoring/.env
+    networks:
+      local_network:
+        aliases:
+          - auto_scaler.app.local
+    depends_on:
+      - redis
+      - log_redis_queue
+
+  flower:
+    image: mher/flower:latest
+    # Local limits:
+    mem_limit: 512m
+    cpus: "0.25"
+    container_name: flower_container
+    environment:
+      - CELERY_BROKER_URL=redis://redis.app.local:6379/0
+      - FLOWER_PORT=5555
+      - FLOWER_UNAUTHENTICATED_API=true
+    ports:
+      - "5555:5555"
+    networks:
+      local_network:
+        aliases:
+          - flower.app.local
+    depends_on:
+      - redis
+      - crawler_main
+    restart: always
+    command: celery flower --persistent=True
+
+networks:
+  local_network:
+    driver: bridge

@@ -1,0 +1,29 @@
+image: python:3.8
+
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  script:
+    - echo "Building the project..."
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+
+test:
+  stage: test
+  script:
+    - echo "Running tests..."
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+
+deploy:
+  stage: deploy
+  script:
+    - aws --version
+    - echo "Deploying the project..."
+    - aws codepipeline start-pipeline-execution --name MyPipeline --region $AWS_DEFAULT_REGION
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'

@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+scrapy = "*"
+scrapyrt = "*"
+selenium = "*"
+pyyaml = "*"
+pymongo = "*"
+scrapy-cloudflare-middleware = "*"
+cfscrape = "*"
+urllib3 = "1.26"
+celery = "*"
+redis = "*"
+requests = "*"
+python-dotenv = "*"
+pandas = "*"
+openpyxl = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"

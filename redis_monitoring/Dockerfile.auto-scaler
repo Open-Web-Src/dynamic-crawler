@@ -1,0 +1,28 @@
+FROM python:3.10-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Install Docker and other necessary dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
+    echo "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y docker-ce docker-ce-cli containerd.io && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy the logging script
+COPY src/ .
+
+# Install necessary Python packages
+RUN pip install redis python-dotenv boto3
+
+# Default command to run the auto-scaler
+CMD ["python3", "src/auto_scaler.py"]
