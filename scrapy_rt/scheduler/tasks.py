@@ -90,6 +90,9 @@ def log_done(*args, **kwargs):
 
     logger.info("Task counters reset for future runs.")
 
+    # Set the global ready-to-terminate flag
+    redis_client.set('all_workers_ready_to_terminate', 'true')
+
     return "All tasks completed successfully."
 
 
@@ -105,9 +108,6 @@ def check_and_trigger_final_chain():
             log_done.s()
         ).apply_async()
         logger.info("Final chain triggered.")
-
-        # Set the global ready-to-terminate flag
-        redis_client.set('all_workers_ready_to_terminate', 'true')
 
 
 def create_spider_tasks(df, spider_name, url_template):
