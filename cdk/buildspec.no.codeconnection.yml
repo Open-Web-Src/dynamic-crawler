@@ -38,7 +38,7 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Building the Docker images...
-      - docker build -t $CRAWLER_REPO_URI:latest ./repo/scrapy_rt
+      - docker build -t $CRAWLER_REPO_URI:latest ./repo/scrapy_redis
       - docker build -t $FLASKAPP_REPO_URI:latest ./repo/flaskapp
       - docker build -t $REACTAPP_REPO_URI:latest ./repo/reactapp
       # - docker build -t $REDIS_LOGGING_REPO_URI:latest ./repo/redis_monitoring

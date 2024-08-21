@@ -1,0 +1,131 @@
+import * as cdk from "aws-cdk-lib";
+import { Construct } from "constructs";
+import { SecurityGroupConstruct, VpcConstruct } from "@constructs";
+
+export class SecurityGroupsStack extends cdk.Stack {
+  public readonly albSecurityGroup: SecurityGroupConstruct;
+  public readonly reactappSecurityGroup: SecurityGroupConstruct;
+  public readonly flaskappSecurityGroup: SecurityGroupConstruct;
+  public readonly crawlerSecurityGroup: SecurityGroupConstruct;
+  public readonly redisSecurityGroup: SecurityGroupConstruct;
+  public readonly seleniumSecurityGroup: SecurityGroupConstruct;
+  public readonly gitlabRunnerSecurityGroup: SecurityGroupConstruct;
+
+  constructor(
+    scope: Construct,
+    id: string,
+    props: { vpc: VpcConstruct } & cdk.StackProps
+  ) {
+    super(scope, id, props);
+
+    // ALB
+    this.albSecurityGroup = new SecurityGroupConstruct(this, "ALBSG", {
+      vpc: props.vpc.vpc,
+      description: "Security group for ALB",
+      ingressRules: [
+        {
+          peer: cdk.aws_ec2.Peer.anyIpv4(),
+          connection: cdk.aws_ec2.Port.tcp(80),
+          description: "Allow HTTP traffic",
+        },
+        {
+          peer: cdk.aws_ec2.Peer.anyIpv4(),
+          connection: cdk.aws_ec2.Port.tcp(443),
+          description: "Allow HTTPS traffic",
+        },
+      ],
+    });
+
+    // REACT_APP
+    this.reactappSecurityGroup = new SecurityGroupConstruct(
+      this,
+      "ReactAppSG",
+      {
+        vpc: props.vpc.vpc,
+        description: "Security group for React app",
+        ingressRules: [
+          {
+            peer: this.albSecurityGroup.securityGroup,
+            connection: cdk.aws_ec2.Port.allTraffic(),
+            description: "Allow all traffic from ALB",
+          },
+        ],
+      }
+    );
+
+    // CRAWLER
+    this.crawlerSecurityGroup = new SecurityGroupConstruct(this, "CrawlerSG", {
+      vpc: props.vpc.vpc,
+      description: "Security group for Scrapy RT",
+    });
+
+    // REDIS
+    this.redisSecurityGroup = new SecurityGroupConstruct(this, "RedisSG", {
+      vpc: props.vpc.vpc,
+      description: "Security group for Redis",
+      ingressRules: [
+        {
+          peer: this.crawlerSecurityGroup.securityGroup,
+          connection: cdk.aws_ec2.Port.allTraffic(),
+          description: "Allow all traffic from ALB",
+        },
+      ],
+    });
+
+    // SELENIUM
+    this.seleniumSecurityGroup = new SecurityGroupConstruct(
+      this,
+      "SeleniumSG",
+      {
+        vpc: props.vpc.vpc,
+        description: "Security group for Selenium",
+        ingressRules: [
+          {
+            peer: this.crawlerSecurityGroup.securityGroup,
+            connection: cdk.aws_ec2.Port.allTraffic(),
+            description: "Allow all traffic from ALB",
+          },
+        ],
+      }
+    );
+
+    // FLASK_APP
+    this.flaskappSecurityGroup = new SecurityGroupConstruct(
+      this,
+      "FlaskAppSG",
+      {
+        vpc: props.vpc.vpc,
+        description: "Security group for Flask app",
+        ingressRules: [
+          {
+            peer: this.reactappSecurityGroup.securityGroup,
+            connection: cdk.aws_ec2.Port.HTTP,
+            description: "Allow HTTP traffic from React",
+          },
+          {
+            peer: this.crawlerSecurityGroup.securityGroup,
+            connection: cdk.aws_ec2.Port.HTTP,
+            description: "Allow HTTP traffic from Crawler",
+          },
+        ],
+      }
+    );
+
+    // GITLAB_RUNNER
+    this.gitlabRunnerSecurityGroup = new SecurityGroupConstruct(
+      this,
+      "GitLabRunnerSG",
+      {
+        vpc: props.vpc.vpc,
+        description: "Security group for GitLab Runner",
+        ingressRules: [
+          {
+            peer: cdk.aws_ec2.Peer.anyIpv4(),
+            connection: cdk.aws_ec2.Port.SSH,
+            description: "Allow SSH Access",
+          },
+        ],
+      }
+    );
+  }
+}

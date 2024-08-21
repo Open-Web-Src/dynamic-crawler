@@ -9,7 +9,7 @@ COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code
-COPY scrapy_rt /app/scrapy_rt
+COPY scrapy_redis /app/scrapy_redis
 COPY scrapy.cfg /app/scrapy.cfg
 COPY scheduler/ /app/scheduler
 

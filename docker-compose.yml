@@ -59,7 +59,7 @@ services:
   #   restart: always # Auto-restart setting
 
   crawler_main:
-    build: ./scrapy_rt
+    build: ./scrapy_redis
     # Local limits:
     mem_limit: 512m
     cpus: "0.25"
@@ -67,14 +67,14 @@ services:
     ports:
       - "9080:9080"
     volumes:
-      - ./scrapy_rt/scrapy.cfg:/app/scrapy.cfg
-      - ./scrapy_rt/requirements.txt:/app/requirements.txt
-      - ./scrapy_rt/logs:/app/logs
-      - ./scrapy_rt/.scrapy:/app/.scrapy
-      - ./scrapy_rt/scrapy_rt:/app/scrapy_rt
-      - ./scrapy_rt/scheduler:/app/scheduler
+      - ./scrapy_redis/scrapy.cfg:/app/scrapy.cfg
+      - ./scrapy_redis/requirements.txt:/app/requirements.txt
+      - ./scrapy_redis/logs:/app/logs
+      - ./scrapy_redis/.scrapy:/app/.scrapy
+      - ./scrapy_redis/scrapy_redis:/app/scrapy_redis
+      - ./scrapy_redis/scheduler:/app/scheduler
     env_file:
-      - ./scrapy_rt/.env
+      - ./scrapy_redis/.env
     networks:
       local_network:
         aliases:
@@ -140,7 +140,7 @@ services:
       - ./redis_monitoring/src:/app/src
       - ./redis_monitoring/metrics:/app/metrics
       - /var/run/docker.sock:/var/run/docker.sock # Optional: Share the Docker socket with the host
-      - ./scrapy_rt/.env:/app/.scrapy.env
+      - ./scrapy_redis/.env:/app/.scrapy.env
     env_file:
       - ./redis_monitoring/.env
     networks:

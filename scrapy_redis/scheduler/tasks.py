@@ -1,7 +1,7 @@
 import time
 import pandas as pd
 import subprocess
-from scrapy_rt.helpers.constants import Constants
+from scrapy_redis.helpers.constants import Constants
 from scheduler.configuration import Config
 from celery import shared_task, chain, group
 from requests.auth import HTTPBasicAuth

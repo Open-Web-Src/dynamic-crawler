@@ -42,7 +42,7 @@ docker buildx create --use
 
 # Build and push Scrapy RT image
 echo "Building and pushing Scrapy RT image..."
-docker buildx build --platform linux/amd64 -t $CRAWLER_REPO_URI:latest ./scrapy_rt --push || { echo 'Build and push failed for Scrapy RT' ; exit 1; }
+docker buildx build --platform linux/amd64 -t $CRAWLER_REPO_URI:latest ./scrapy_redis --push || { echo 'Build and push failed for Scrapy RT' ; exit 1; }
 
 # Build and push Flask app image
 echo "Building and pushing Flask app image..."
