@@ -9,7 +9,9 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "deploy:ecr": "cdk deploy --app 'npx ts-node --prefer-ts-exts -r tsconfig-paths/register bin/deploy-ecr-stack.ts' --all --verbose --profile default"
+    "deploy:ecr": "cdk deploy --app 'npx ts-node --prefer-ts-exts -r tsconfig-paths/register bin/deploy-ecr-stack.ts' --all --verbose --profile default",
+    "deploy:vpc": "cdk deploy --app 'npx ts-node --prefer-ts-exts -r tsconfig-paths/register bin/deploy-vpc-stack.ts' --all --verbose --profile default",
+    "deploy:gitlab-runner": "cdk deploy --app 'npx ts-node --prefer-ts-exts -r tsconfig-paths/register bin/deploy-ec2-gitlab-runner-stack.ts' --all --verbose --profile default"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",

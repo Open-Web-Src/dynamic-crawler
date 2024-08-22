@@ -6,7 +6,7 @@ import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import { EcsFargateConstruct } from "@constructs";
 
 interface AlbConstructProps {
-  vpc: ec2.Vpc;
+  vpc: ec2.IVpc;
   securityGroup: ec2.SecurityGroup;
 }
 

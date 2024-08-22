@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
 import { SecurityGroupConstruct, VpcConstruct } from "@constructs";
 
 export class SecurityGroupsStack extends cdk.Stack {
@@ -14,13 +15,13 @@ export class SecurityGroupsStack extends cdk.Stack {
   constructor(
     scope: Construct,
     id: string,
-    props: { vpc: VpcConstruct } & cdk.StackProps
+    props: { vpc: ec2.IVpc } & cdk.StackProps
   ) {
     super(scope, id, props);
 
     // ALB
     this.albSecurityGroup = new SecurityGroupConstruct(this, "ALBSG", {
-      vpc: props.vpc.vpc,
+      vpc: props.vpc,
       description: "Security group for ALB",
       ingressRules: [
         {
@@ -41,7 +42,7 @@ export class SecurityGroupsStack extends cdk.Stack {
       this,
       "ReactAppSG",
       {
-        vpc: props.vpc.vpc,
+        vpc: props.vpc,
         description: "Security group for React app",
         ingressRules: [
           {
@@ -55,13 +56,13 @@ export class SecurityGroupsStack extends cdk.Stack {
 
     // CRAWLER
     this.crawlerSecurityGroup = new SecurityGroupConstruct(this, "CrawlerSG", {
-      vpc: props.vpc.vpc,
+      vpc: props.vpc,
       description: "Security group for Crawler",
     });
 
     // REDIS
     this.redisSecurityGroup = new SecurityGroupConstruct(this, "RedisSG", {
-      vpc: props.vpc.vpc,
+      vpc: props.vpc,
       description: "Security group for Redis",
       ingressRules: [
         {
@@ -77,7 +78,7 @@ export class SecurityGroupsStack extends cdk.Stack {
       this,
       "SeleniumSG",
       {
-        vpc: props.vpc.vpc,
+        vpc: props.vpc,
         description: "Security group for Selenium",
         ingressRules: [
           {
@@ -94,7 +95,7 @@ export class SecurityGroupsStack extends cdk.Stack {
       this,
       "FlaskAppSG",
       {
-        vpc: props.vpc.vpc,
+        vpc: props.vpc,
         description: "Security group for Flask app",
         ingressRules: [
           {
@@ -106,23 +107,6 @@ export class SecurityGroupsStack extends cdk.Stack {
             peer: this.crawlerSecurityGroup.securityGroup,
             connection: cdk.aws_ec2.Port.tcp(5001),
             description: "Allow TCP(5001) traffic from Crawler",
-          },
-        ],
-      }
-    );
-
-    // GITLAB_RUNNER
-    this.gitlabRunnerSecurityGroup = new SecurityGroupConstruct(
-      this,
-      "GitLabRunnerSG",
-      {
-        vpc: props.vpc.vpc,
-        description: "Security group for GitLab Runner",
-        ingressRules: [
-          {
-            peer: cdk.aws_ec2.Peer.anyIpv4(),
-            connection: cdk.aws_ec2.Port.SSH,
-            description: "Allow SSH Access",
           },
         ],
       }

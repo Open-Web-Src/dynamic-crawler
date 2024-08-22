@@ -2,7 +2,7 @@ import { Construct } from "constructs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 
 interface SecurityGroupConstructProps {
-  vpc: ec2.Vpc;
+  vpc: ec2.IVpc;
   description: string;
   allowAllOutbound?: boolean;
   ingressRules?: {

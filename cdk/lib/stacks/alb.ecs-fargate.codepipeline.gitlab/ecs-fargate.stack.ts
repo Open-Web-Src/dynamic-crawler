@@ -14,7 +14,7 @@ import {
 } from "@constructs";
 
 interface EcsClusterStackProps extends cdk.StackProps {
-  vpc: VpcConstruct;
+  vpc: ec2.IVpc;
   albSecurityGroup: SecurityGroupConstruct;
   reactappSecurityGroup: SecurityGroupConstruct;
   flaskappSecurityGroup: SecurityGroupConstruct;
@@ -40,7 +40,7 @@ export class EcsFargateClusterStack extends cdk.Stack {
     super(scope, id, props);
 
     const cluster = new cdk.aws_ecs.Cluster(this, "Cluster", {
-      vpc: props.vpc.vpc,
+      vpc: props.vpc,
     });
 
     const namespace = new servicediscovery.PrivateDnsNamespace(
@@ -48,7 +48,7 @@ export class EcsFargateClusterStack extends cdk.Stack {
       "Namespace",
       {
         name: "app.local",
-        vpc: props.vpc.vpc,
+        vpc: props.vpc,
       }
     );
 
