@@ -27,7 +27,7 @@ app.conf.update(
     beat_schedule={
         'start_crawling_daily': {
             'task': 'scheduler.tasks.start_crawling',
-            'schedule': crontab(hour=10, minute=40),
+            'schedule': crontab(hour=13, minute=00),
         },
     },
 )

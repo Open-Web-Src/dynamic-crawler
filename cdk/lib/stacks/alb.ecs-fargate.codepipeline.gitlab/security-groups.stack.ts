@@ -56,7 +56,7 @@ export class SecurityGroupsStack extends cdk.Stack {
     // CRAWLER
     this.crawlerSecurityGroup = new SecurityGroupConstruct(this, "CrawlerSG", {
       vpc: props.vpc.vpc,
-      description: "Security group for Scrapy RT",
+      description: "Security group for Crawler",
     });
 
     // REDIS
@@ -67,7 +67,7 @@ export class SecurityGroupsStack extends cdk.Stack {
         {
           peer: this.crawlerSecurityGroup.securityGroup,
           connection: cdk.aws_ec2.Port.allTraffic(),
-          description: "Allow all traffic from ALB",
+          description: "Allow all traffic from Crawler",
         },
       ],
     });
@@ -83,7 +83,7 @@ export class SecurityGroupsStack extends cdk.Stack {
           {
             peer: this.crawlerSecurityGroup.securityGroup,
             connection: cdk.aws_ec2.Port.allTraffic(),
-            description: "Allow all traffic from ALB",
+            description: "Allow all traffic from Crawler",
           },
         ],
       }
@@ -99,13 +99,13 @@ export class SecurityGroupsStack extends cdk.Stack {
         ingressRules: [
           {
             peer: this.reactappSecurityGroup.securityGroup,
-            connection: cdk.aws_ec2.Port.HTTP,
-            description: "Allow HTTP traffic from React",
+            connection: cdk.aws_ec2.Port.tcp(5001),
+            description: "Allow TCP(5001) traffic from React",
           },
           {
             peer: this.crawlerSecurityGroup.securityGroup,
-            connection: cdk.aws_ec2.Port.HTTP,
-            description: "Allow HTTP traffic from Crawler",
+            connection: cdk.aws_ec2.Port.tcp(5001),
+            description: "Allow TCP(5001) traffic from Crawler",
           },
         ],
       }

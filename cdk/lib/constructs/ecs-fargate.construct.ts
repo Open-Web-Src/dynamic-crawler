@@ -54,7 +54,7 @@ export class EcsFargateConstruct extends Construct {
         ? ecs.ContainerImage.fromRegistry(props.repository)
         : ecs.ContainerImage.fromEcrRepository(props.repository);
 
-    const mainContainer = taskDefinition.addContainer(props.containerName, {
+    taskDefinition.addContainer(props.containerName, {
       image: containerImage,
       logging: ecs.LogDrivers.awsLogs({
         streamPrefix: props.containerName,
@@ -74,20 +74,17 @@ export class EcsFargateConstruct extends Construct {
             ? ecs.ContainerImage.fromRegistry(containerProps.repository)
             : ecs.ContainerImage.fromEcrRepository(containerProps.repository);
 
-        const additionalContainer = taskDefinition.addContainer(
-          containerProps.containerName,
-          {
-            image: additionalContainerImage,
-            logging: ecs.LogDrivers.awsLogs({
-              streamPrefix: containerProps.containerName,
-              logRetention: props.logRetention ?? logs.RetentionDays.ONE_DAY,
-            }),
-            portMappings: containerProps.portMappings,
-            environment: containerProps.environment,
-            secrets: containerProps.secrets,
-            command: containerProps.command,
-          }
-        );
+        taskDefinition.addContainer(containerProps.containerName, {
+          image: additionalContainerImage,
+          logging: ecs.LogDrivers.awsLogs({
+            streamPrefix: containerProps.containerName,
+            logRetention: props.logRetention ?? logs.RetentionDays.ONE_DAY,
+          }),
+          portMappings: containerProps.portMappings,
+          environment: containerProps.environment,
+          secrets: containerProps.secrets,
+          command: containerProps.command,
+        });
       }
     }
 
