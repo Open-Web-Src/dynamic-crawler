@@ -6,6 +6,10 @@ import {
   SecurityGroupConstruct,
   Ec2Construct,
 } from "@constructs";
+import * as dotenv from "dotenv";
+
+// Load environment variables from .env file
+dotenv.config();
 
 interface Ec2StackProps extends cdk.StackProps {
   vpc: VpcConstruct;
@@ -23,12 +27,12 @@ export class Ec2Stack extends cdk.Stack {
       vpc: props.vpc.vpc,
       securityGroup: props.securityGroup.securityGroup,
       keyName: props.keyName,
-      vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC }, // Example of vpcSubnets usage
+      vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T2,
         ec2.InstanceSize.MICRO
       ),
-      machineImage: ec2.MachineImage.latestAmazonLinux(),
+      machineImage: ec2.MachineImage.latestAmazonLinux2(),
       userDataCommands: [
         "sudo yum update -y",
         "sudo yum install -y curl git",

@@ -13,7 +13,7 @@ interface EcsFargateConstructProps {
   repository: ecr.IRepository | string;
   taskRole: iam.Role;
   containerName: string;
-  portMappings: ecs.PortMapping[];
+  portMappings?: ecs.PortMapping[];
   cpu?: number;
   memoryLimitMiB?: number;
   executionRole?: iam.Role;
@@ -24,6 +24,15 @@ interface EcsFargateConstructProps {
   serviceName?: string;
   command?: string[];
   logRetention?: logs.RetentionDays;
+  additionalContainers?: {
+    containerName: string;
+    repository: ecr.IRepository | string;
+    portMappings?: ecs.PortMapping[];
+    environment?: { [key: string]: string };
+    secrets?: { [key: string]: ecs.Secret };
+    command?: string[];
+    logRetention?: logs.RetentionDays;
+  }[];
 }
 
 export class EcsFargateConstruct extends Construct {
@@ -45,7 +54,7 @@ export class EcsFargateConstruct extends Construct {
         ? ecs.ContainerImage.fromRegistry(props.repository)
         : ecs.ContainerImage.fromEcrRepository(props.repository);
 
-    taskDefinition.addContainer(props.containerName, {
+    const mainContainer = taskDefinition.addContainer(props.containerName, {
       image: containerImage,
       logging: ecs.LogDrivers.awsLogs({
         streamPrefix: props.containerName,
@@ -56,6 +65,31 @@ export class EcsFargateConstruct extends Construct {
       secrets: props.secrets,
       command: props.command,
     });
+
+    // Add additional containers if provided
+    if (props.additionalContainers) {
+      for (const containerProps of props.additionalContainers) {
+        const additionalContainerImage =
+          typeof containerProps.repository === "string"
+            ? ecs.ContainerImage.fromRegistry(containerProps.repository)
+            : ecs.ContainerImage.fromEcrRepository(containerProps.repository);
+
+        const additionalContainer = taskDefinition.addContainer(
+          containerProps.containerName,
+          {
+            image: additionalContainerImage,
+            logging: ecs.LogDrivers.awsLogs({
+              streamPrefix: containerProps.containerName,
+              logRetention: props.logRetention ?? logs.RetentionDays.ONE_DAY,
+            }),
+            portMappings: containerProps.portMappings,
+            environment: containerProps.environment,
+            secrets: containerProps.secrets,
+            command: containerProps.command,
+          }
+        );
+      }
+    }
 
     this.service = new ecs.FargateService(this, "Service", {
       cluster: props.cluster,

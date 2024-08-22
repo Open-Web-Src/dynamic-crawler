@@ -39,9 +39,9 @@ export class Ec2Construct extends Construct {
       instanceType:
         props.instanceType ||
         ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO),
-      machineImage: props.machineImage || ec2.MachineImage.latestAmazonLinux(),
+      machineImage: props.machineImage || ec2.MachineImage.latestAmazonLinux2(),
       securityGroup: props.securityGroup,
-      keyName: props.keyName,
+      keyPair: ec2.KeyPair.fromKeyPairName(this, "KeyPair", props.keyName),
       role: role,
       vpcSubnets: props.vpcSubnets,
       userData,

@@ -34,6 +34,7 @@ export class EcsFargateClusterStack extends cdk.Stack {
   public readonly crawlerReplicaService: EcsFargateConstruct;
   public readonly redisService: EcsFargateConstruct;
   public readonly seleniumService: EcsFargateConstruct;
+  public readonly redisLoggingService: EcsFargateConstruct;
 
   constructor(scope: Construct, id: string, props: EcsClusterStackProps) {
     super(scope, id, props);
@@ -56,6 +57,7 @@ export class EcsFargateClusterStack extends cdk.Stack {
       managedPolicies: [
         "service-role/AmazonECSTaskExecutionRolePolicy",
         "AmazonEC2ContainerRegistryReadOnly",
+        "CloudWatchAgentServerPolicy",
       ],
     });
 
@@ -234,6 +236,36 @@ export class EcsFargateClusterStack extends cdk.Stack {
         desiredCount: 1,
         serviceDiscoveryNamespace: namespace,
         serviceName: "crawler-replica",
+        logRetention: logs.RetentionDays.ONE_WEEK,
+      }
+    );
+
+    // REDIS_LOGGING
+    this.redisLoggingService = new EcsFargateConstruct(
+      this,
+      "RedisLoggingService",
+      {
+        cluster,
+        vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+        securityGroup: props.crawlerSecurityGroup.securityGroup,
+        repository: props.redisLoggingRepo,
+        taskRole: taskRole.role,
+        containerName: process.env.REDIS_LOGGING_CONTAINER_NAME!,
+        cpu: 256,
+        memoryLimitMiB: 512,
+        environment: {
+          ENV: "pro",
+          REDIS_HOST: process.env.REDIS_HOST!,
+          REDIS_PORT: process.env.REDIS_PORT!,
+          REDIS_QUEUE_NAME: process.env.REDIS_QUEUE_NAME!,
+          AWS_REGION: process.env.AWS_DEFAULT_REGION!,
+          CLOUDWATCH_NAMESPACE: process.env.CLOUDWATCH_NAMESPACE!,
+          CLOUDWATCH_METRIC_NAME: process.env.CLOUDWATCH_METRIC_NAME!,
+          CLOUDWATCH_DIMENSIONS_0: process.env.CLOUDWATCH_DIMENSIONS_0!,
+        },
+        desiredCount: 1,
+        serviceDiscoveryNamespace: namespace,
+        serviceName: "redis-logging",
         logRetention: logs.RetentionDays.ONE_WEEK,
       }
     );

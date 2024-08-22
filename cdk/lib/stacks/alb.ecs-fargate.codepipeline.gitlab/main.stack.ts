@@ -6,7 +6,7 @@ import { SecurityGroupsStack } from "./security-groups.stack";
 import { EcsFargateClusterStack } from "./ecs-fargate.stack";
 import { AlbStack } from "./alb.stack";
 import { PipelineStack } from "./pipeline.stack";
-// import { Ec2Stack } from "./ec2.stack";
+import { Ec2Stack } from "./ec2.stack";
 
 export class MainStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -66,19 +66,20 @@ export class MainStack extends cdk.Stack {
 
     new PipelineStack(this, "PipelineStack", {
       services: {
-        crawlerMain: ecsClusterStack.crawlerMainService,
-        crawlerReplica: ecsClusterStack.crawlerReplicaService,
+        crawler_main: ecsClusterStack.crawlerMainService,
+        crawler_replica: ecsClusterStack.crawlerReplicaService,
         flaskapp: ecsClusterStack.flaskappService,
         reactapp: ecsClusterStack.reactappService,
         redis: ecsClusterStack.redisService,
         selenium: ecsClusterStack.seleniumService,
+        redis_logging: ecsClusterStack.redisLoggingService,
       },
     });
 
-    // new Ec2Stack(this, "Ec2Stack", {
-    //   vpc: vpcStack.vpc,
-    //   securityGroup: sgStack.gitlabRunnerSecurityGroup,
-    //   keyName: process.env.GITLAB_RUNNER_SSH_KEYNAME!,
-    // });
+    new Ec2Stack(this, "Ec2Stack", {
+      vpc: vpcStack.vpc,
+      securityGroup: sgStack.gitlabRunnerSecurityGroup,
+      keyName: process.env.GITLAB_RUNNER_SSH_KEYNAME!,
+    });
   }
 }

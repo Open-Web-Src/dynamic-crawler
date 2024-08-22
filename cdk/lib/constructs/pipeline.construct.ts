@@ -10,7 +10,7 @@ import { IamRoleConstruct } from "@constructs";
 interface PipelineSourceConfig {
   type: "S3" | "GitHub" | "GitLab";
   s3BucketName?: string;
-  gitRepoUrl?: string;
+  gitRepo?: string;
   gitBranch?: string;
   gitOwner?: string;
   gitConnectionArn?: string;
@@ -61,7 +61,7 @@ export class PipelineConstruct extends Construct {
         connectionArn: props.sourceConfig.gitConnectionArn!,
         output: sourceOutput,
         owner: props.sourceConfig.gitOwner!, // GitHub/GitLab owner
-        repo: props.sourceConfig.gitRepoUrl!,
+        repo: props.sourceConfig.gitRepo!,
         branch: props.sourceConfig.gitBranch!,
       });
     } else {

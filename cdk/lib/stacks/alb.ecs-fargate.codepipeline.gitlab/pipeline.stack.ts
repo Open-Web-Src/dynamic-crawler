@@ -1,6 +1,10 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { PipelineConstruct, EcsFargateConstruct } from "@constructs";
+import * as dotenv from "dotenv";
+
+// Load environment variables from .env file
+dotenv.config();
 
 export class PipelineStack extends cdk.Stack {
   constructor(
@@ -19,7 +23,7 @@ export class PipelineStack extends cdk.Stack {
       }, {} as { [key: string]: cdk.aws_ecs.FargateService }),
       sourceConfig: {
         type: "GitLab",
-        gitRepoUrl: process.env.GITLAB_REPO_URL!,
+        gitRepo: process.env.GITLAB_REPO!,
         gitBranch: process.env.GITLAB_BRANCH!,
         gitOwner: process.env.GITLAB_OWNER!,
         gitConnectionArn: process.env.GITLAB_CONNECTION_ARN!,
@@ -29,6 +33,14 @@ export class PipelineStack extends cdk.Stack {
         ACCOUNT_ID: process.env.ACCOUNT_ID!,
         DOCKERHUB_USERNAME: process.env.DOCKERHUB_USERNAME!,
         DOCKERHUB_PASSWORD: process.env.DOCKERHUB_PASSWORD!,
+        CRAWLER_MAIN_CONTAINER_NAME: process.env.CRAWLER_MAIN_CONTAINER_NAME!,
+        CRAWLER_REPLICA_CONTAINER_NAME:
+          process.env.CRAWLER_MAIN_CONTAINER_NAME!,
+        FLASKAPP_CONTAINER_NAME: process.env.FLASKAPP_CONTAINER_NAME!,
+        REACTAPP_CONTAINER_NAME: process.env.REACTAPP_CONTAINER_NAME!,
+        SELENIUM_CONTAINER_NAME: process.env.SELENIUM_CONTAINER_NAME!,
+        REDIS_CONTAINER_NAME: process.env.REDIS_CONTAINER_NAME!,
+        REDIS_LOGGING_CONTAINER_NAME: process.env.REDIS_LOGGING_CONTAINER_NAME!,
       },
     });
   }

@@ -3,6 +3,7 @@ import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import { EcsFargateConstruct } from "@constructs";
 
 interface AlbConstructProps {
   vpc: ec2.Vpc;
@@ -25,10 +26,13 @@ export class AlbConstruct extends Construct {
   public addListener(
     id: string,
     incomingRequestPort: number,
-    targetGroupPort: number,
-    containerPort: number,
-    targets: ecs.FargateService[],
+    targets: {
+      service: ecs.FargateService;
+      containerName: string;
+      containerPort: number;
+    }[],
     protocol: elbv2.ApplicationProtocol = elbv2.ApplicationProtocol.HTTP,
+    hostPort?: number,
     certificateArn?: string
   ) {
     const listenerProps: elbv2.BaseApplicationListenerProps = {
@@ -62,10 +66,10 @@ export class AlbConstruct extends Construct {
     } else {
       // Add targets if it's a normal listener
       listener.addTargets(`${id}Targets`, {
-        port: targetGroupPort,
-        targets: targets.map((service) =>
+        port: hostPort ?? targets[0].containerPort, // hostPort is only be used in EC2 Launch type
+        targets: targets.map(({ service, containerName, containerPort }) =>
           service.loadBalancerTarget({
-            containerName: service.serviceName,
+            containerName,
             containerPort,
           })
         ),
