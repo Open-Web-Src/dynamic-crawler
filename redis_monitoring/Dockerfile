@@ -4,7 +4,7 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # Copy the logging script
-COPY src/ .
+COPY src/ /app/src/
 
 # Install necessary Python packages
 RUN pip install redis python-dotenv boto3

@@ -19,7 +19,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the logging script
-COPY src/ .
+COPY src/ /app/src/
 
 # Install necessary Python packages
 RUN pip install redis python-dotenv boto3
