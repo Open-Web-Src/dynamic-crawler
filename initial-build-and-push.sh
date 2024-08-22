@@ -2,8 +2,8 @@
 # Only run for the first time
 
 # Variables
-REGION=
-ACCOUNT_ID=
+REGION=us-east-1
+ACCOUNT_ID=786201404630
 PROFILE="default"
 
 # Function to retrieve ECR URI from Parameter Store
@@ -21,13 +21,13 @@ echo "Retrieving ECR URIs from Parameter Store..."
 CRAWLER_REPO_URI=$(get_ecr_uri /ecr/crawler_repo_uri)
 FLASKAPP_REPO_URI=$(get_ecr_uri /ecr/flaskapp_repo_uri)
 REACTAPP_REPO_URI=$(get_ecr_uri /ecr/reactapp_repo_uri)
-# REDIS_LOGGING_REPO_URI=$(get_ecr_uri /ecr/redis_logging_repo_uri)
+REDIS_LOGGING_REPO_URI=$(get_ecr_uri /ecr/redis_logging_repo_uri)
 
 # Check if URIs were retrieved successfully
-# [ -z "$REDIS_LOGGING_REPO_URI" ]
 if [ -z "$CRAWLER_REPO_URI" ] || \
    [ -z "$FLASKAPP_REPO_URI" ] || \
-   [ -z "$REACTAPP_REPO_URI" ]; then
+   [ -z "$REACTAPP_REPO_URI" ] || \
+   [ -z "$REDIS_LOGGING_REPO_URI" ]; then
   echo "Failed to retrieve one or more ECR URIs"
   exit 1
 fi
@@ -35,7 +35,7 @@ fi
 echo "CRAWLER_REPO_URI: $CRAWLER_REPO_URI"
 echo "FLASKAPP_REPO_URI: $FLASKAPP_REPO_URI"
 echo "REACTAPP_REPO_URI: $REACTAPP_REPO_URI"
-# echo "REACTAPP_REPO_URI: $REDIS_LOGGING_REPO_URI"
+echo "REACTAPP_REPO_URI: $REDIS_LOGGING_REPO_URI"
 
 # Ensure Buildx is set up
 docker buildx create --use
@@ -53,7 +53,7 @@ echo "Building and pushing React app image..."
 docker buildx build --platform linux/amd64 -t $REACTAPP_REPO_URI:latest ./reactapp --push || { echo 'Build and push failed for React app' ; exit 1; }
 
 # Build and push React app image
-# echo "Building and pushing Redis Logging image..."
-# docker buildx build --platform linux/amd64 -t $REDIS_LOGGING_REPO_URI:latest ./redis_monitoring --push || { echo 'Build and push failed for Redis Logging' ; exit 1; }
+echo "Building and pushing Redis Logging image..."
+docker buildx build --platform linux/amd64 -t $REDIS_LOGGING_REPO_URI:latest ./redis_monitoring --push || { echo 'Build and push failed for Redis Logging' ; exit 1; }
 
 echo "All images have been pushed to ECR."

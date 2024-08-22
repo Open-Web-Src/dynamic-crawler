@@ -10,7 +10,7 @@ interface EcsFargateConstructProps {
   cluster: ecs.Cluster;
   vpcSubnets: ec2.SubnetSelection;
   securityGroup: ec2.SecurityGroup;
-  repository: ecr.Repository | string;
+  repository: ecr.IRepository | string;
   taskRole: iam.Role;
   containerName: string;
   portMappings: ecs.PortMapping[];

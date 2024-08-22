@@ -8,7 +8,6 @@ export class PipelineStack extends cdk.Stack {
     id: string,
     props: {
       services: { [key: string]: EcsFargateConstruct };
-      sourceBucketName: string;
     } & cdk.StackProps
   ) {
     super(scope, id, props);
@@ -19,13 +18,13 @@ export class PipelineStack extends cdk.Stack {
         return acc;
       }, {} as { [key: string]: cdk.aws_ecs.FargateService }),
       sourceConfig: {
-        type: "S3",
-        s3BucketName: props.sourceBucketName,
+        type: "GitLab",
+        gitRepoUrl: process.env.GITLAB_REPO_URL!,
+        gitBranch: process.env.GITLAB_BRANCH!,
+        gitOwner: process.env.GITLAB_OWNER!,
+        gitConnectionArn: process.env.GITLAB_CONNECTION_ARN!,
       },
       environmentVariables: {
-        GITLAB_USERNAME: process.env.GITLAB_USERNAME!,
-        GITLAB_TOKEN: process.env.GITLAB_TOKEN!,
-        BRANCH: process.env.BRANCH!,
         AWS_DEFAULT_REGION: process.env.AWS_DEFAULT_REGION!,
         ACCOUNT_ID: process.env.ACCOUNT_ID!,
         DOCKERHUB_USERNAME: process.env.DOCKERHUB_USERNAME!,

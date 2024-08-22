@@ -6,3 +6,4 @@ export * from "./ecs-fargate.construct";
 export * from "./security-group.construct";
 export * from "./alb.construct";
 export * from "./pipeline.construct";
+export * from "./ec2.construct";

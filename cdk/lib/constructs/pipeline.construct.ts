@@ -12,6 +12,7 @@ interface PipelineSourceConfig {
   s3BucketName?: string;
   gitRepoUrl?: string;
   gitBranch?: string;
+  gitOwner?: string;
   gitConnectionArn?: string;
 }
 
@@ -59,7 +60,7 @@ export class PipelineConstruct extends Construct {
         actionName: "Source",
         connectionArn: props.sourceConfig.gitConnectionArn!,
         output: sourceOutput,
-        owner: "kimhiepninh02121997", // GitHub/GitLab owner
+        owner: props.sourceConfig.gitOwner!, // GitHub/GitLab owner
         repo: props.sourceConfig.gitRepoUrl!,
         branch: props.sourceConfig.gitBranch!,
       });

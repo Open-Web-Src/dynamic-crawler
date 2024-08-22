@@ -1,0 +1,70 @@
+version: 0.2
+
+env:
+  variables:
+    CRAWLER_REPO_URI: ""
+    FLASKAPP_REPO_URI: ""
+    REACTAPP_REPO_URI: ""
+    REDIS_LOGGING_REPO_URI: ""
+
+phases:
+  install:
+    commands:
+      - echo Starting Docker daemon...
+      - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay2 &
+      - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
+      - docker --version
+      - apt-get update && apt-get install -y git
+
+  pre_build:
+    commands:
+      - echo Retrieving ECR URIs from Parameter Store...
+      - CRAWLER_REPO_URI=$(aws ssm get-parameter --name /ecr/crawler_repo_uri --query "Parameter.Value" --output text)
+      - FLASKAPP_REPO_URI=$(aws ssm get-parameter --name /ecr/flaskapp_repo_uri --query "Parameter.Value" --output text)
+      - REACTAPP_REPO_URI=$(aws ssm get-parameter --name /ecr/reactapp_repo_uri --query "Parameter.Value" --output text)
+      - REDIS_LOGGING_REPO_URI=$(aws ssm get-parameter --name /ecr/redis_logging_repo_uri --query "Parameter.Value" --output text)
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $CRAWLER_REPO_URI
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $FLASKAPP_REPO_URI
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REACTAPP_REPO_URI
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REDIS_LOGGING_REPO_URI
+      - echo Logging in to Docker Hub...
+      - echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker images...
+      - docker build -t $CRAWLER_REPO_URI:latest ./scrapy_redis
+      - docker build -t $FLASKAPP_REPO_URI:latest ./flaskapp
+      - docker build -t $REACTAPP_REPO_URI:latest ./reactapp
+      - docker build -t $REDIS_LOGGING_REPO_URI:latest ./redis_monitoring
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $CRAWLER_REPO_URI:latest
+      - docker push $FLASKAPP_REPO_URI:latest
+      - docker push $REACTAPP_REPO_URI:latest
+      - docker push $REDIS_LOGGING_REPO_URI:latest
+      - echo Writing image definitions file...
+      - python3 generate_imagedefinitions.py REDIS_CONTAINER_NAME redis:latest imagedefinitions_redis.json
+      - python3 generate_imagedefinitions.py SELENIUM_CONTAINER_NAME selenium/standalone-firefox:latest imagedefinitions_selenium.json
+      - python3 generate_imagedefinitions.py CRAWLER_MAIN_CONTAINER_NAME $CRAWLER_REPO_URI:latest imagedefinitions_crawler_main.json
+      - python3 generate_imagedefinitions.py CRAWLER_REPLICA_CONTAINER_NAME $CRAWLER_REPO_URI:latest imagedefinitions_crawler_replica.json
+      - python3 generate_imagedefinitions.py FLASKAPP_CONTAINER_NAME $FLASKAPP_REPO_URI:latest imagedefinitions_flaskapp.json
+      - python3 generate_imagedefinitions.py REACTAPP_CONTAINER_NAME $REACTAPP_REPO_URI:latest imagedefinitions_reactapp.json
+      - python3 generate_imagedefinitions.py REDIS_LOGGING_CONTAINER_NAME $REDIS_LOGGING_REPO_URI:latest imagedefinitions_redis_logging.json
+      - echo Done
+  
+artifacts:
+  files:
+    - imagedefinitions_redis.json
+    - imagedefinitions_selenium.json
+    - imagedefinitions_crawler_main.json
+    - imagedefinitions_crawler_replica.json
+    - imagedefinitions_flaskapp.json
+    - imagedefinitions_reactapp.json
+    - imagedefinitions_redis_logging.json

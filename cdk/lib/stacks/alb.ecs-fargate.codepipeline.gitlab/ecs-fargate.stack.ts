@@ -10,7 +10,6 @@ import {
   EcsFargateConstruct,
   VpcConstruct,
   SecurityGroupConstruct,
-  EcrConstruct,
   IamRoleConstruct,
 } from "@constructs";
 
@@ -22,9 +21,10 @@ interface EcsClusterStackProps extends cdk.StackProps {
   crawlerSecurityGroup: SecurityGroupConstruct;
   redisSecurityGroup: SecurityGroupConstruct;
   seleniumSecurityGroup: SecurityGroupConstruct;
-  crawlerRepo: EcrConstruct;
-  flaskappRepo: EcrConstruct;
-  reactappRepo: EcrConstruct;
+  crawlerRepo: ecr.IRepository;
+  flaskappRepo: ecr.IRepository;
+  reactappRepo: ecr.IRepository;
+  redisLoggingRepo: ecr.IRepository;
 }
 
 export class EcsFargateClusterStack extends cdk.Stack {
@@ -74,7 +74,7 @@ export class EcsFargateClusterStack extends cdk.Stack {
       cluster,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       securityGroup: props.reactappSecurityGroup.securityGroup,
-      repository: props.reactappRepo.repository,
+      repository: props.reactappRepo,
       taskRole: taskRole.role,
       containerName: process.env.REACTAPP_CONTAINER_NAME!,
       portMappings: [{ containerPort: 80 }],
@@ -91,7 +91,7 @@ export class EcsFargateClusterStack extends cdk.Stack {
       cluster,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       securityGroup: props.flaskappSecurityGroup.securityGroup,
-      repository: props.flaskappRepo.repository,
+      repository: props.flaskappRepo,
       taskRole: taskRole.role,
       containerName: process.env.FLASKAPP_CONTAINER_NAME!,
       portMappings: [{ containerPort: 5001 }],
@@ -155,7 +155,7 @@ export class EcsFargateClusterStack extends cdk.Stack {
         cluster,
         vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
         securityGroup: props.crawlerSecurityGroup.securityGroup,
-        repository: props.crawlerRepo.repository,
+        repository: props.crawlerRepo,
         taskRole: taskRole.role,
         containerName: process.env.CRAWLER_MAIN_CONTAINER_NAME!,
         portMappings: [{ containerPort: 5002 }],
@@ -201,7 +201,7 @@ export class EcsFargateClusterStack extends cdk.Stack {
         cluster,
         vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
         securityGroup: props.crawlerSecurityGroup.securityGroup,
-        repository: props.crawlerRepo.repository,
+        repository: props.crawlerRepo,
         taskRole: taskRole.role,
         containerName: process.env.CRAWLER_MAIN_CONTAINER_NAME!,
         portMappings: [{ containerPort: 5003 }],

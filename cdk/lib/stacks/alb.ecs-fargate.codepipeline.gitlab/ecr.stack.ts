@@ -2,7 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { EcrConstruct } from "@constructs";
 
-export class ECRStack extends cdk.Stack {
+export class EcrStack extends cdk.Stack {
   public readonly repositories: { [key: string]: EcrConstruct };
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -20,6 +20,10 @@ export class ECRStack extends cdk.Stack {
       crawler: new EcrConstruct(this, "CrawlerRepo", {
         repositoryName: "crawler",
         ssmParameterName: "/ecr/crawler_repo_uri",
+      }),
+      monitor: new EcrConstruct(this, "RedisLoggingRepo", {
+        repositoryName: "redis_logging",
+        ssmParameterName: "/ecr/redis_logging_repo_uri",
       }),
     };
   }
