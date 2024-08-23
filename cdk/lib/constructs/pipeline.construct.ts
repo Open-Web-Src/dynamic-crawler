@@ -16,10 +16,15 @@ interface PipelineSourceConfig {
   gitConnectionArn?: string;
 }
 
-interface PipelineConstructProps {
+interface DeploymentStage {
+  stageName: string;
   services: { [key: string]: ecs.FargateService };
+}
+
+interface PipelineConstructProps {
   sourceConfig: PipelineSourceConfig;
   environmentVariables: { [key: string]: string };
+  deploymentStages: DeploymentStage[];
 }
 
 export class PipelineConstruct extends Construct {
@@ -121,19 +126,19 @@ export class PipelineConstruct extends Construct {
             }),
           ],
         },
-        {
-          stageName: "Deploy",
-          actions: Object.keys(props.services).map((serviceName) => {
+        ...props.deploymentStages.map((stage) => ({
+          stageName: stage.stageName,
+          actions: Object.keys(stage.services).map((serviceName) => {
             return new codepipelineActions.EcsDeployAction({
               actionName: `${serviceName}Deploy`,
-              service: props.services[serviceName],
+              service: stage.services[serviceName],
               imageFile: new codepipeline.ArtifactPath(
                 buildOutput,
                 `imagedefinitions_${serviceName}.json`
               ),
             });
           }),
-        },
+        })),
       ],
     });
   }

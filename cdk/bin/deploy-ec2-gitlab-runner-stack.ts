@@ -4,10 +4,20 @@ import { Construct } from "constructs";
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import { Ec2Construct, SecurityGroupConstruct } from "@constructs";
+import * as dotenv from "dotenv";
+
+// Load environment variables from .env file
+dotenv.config();
 
 class GitLabRunnerStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
+    super(scope, id, {
+      ...props,
+      env: {
+        account: process.env.ACCOUNT_ID,
+        region: process.env.AWS_DEFAULT_REGION,
+      },
+    });
 
     // Load an existing VPC by its ID or other criteria
     const vpc = ec2.Vpc.fromLookup(this, "ExistingVpc", {
@@ -55,4 +65,5 @@ class GitLabRunnerStack extends cdk.Stack {
 
 const app = new cdk.App();
 new GitLabRunnerStack(app, "GitLabRunnerStack");
+
 app.synth();

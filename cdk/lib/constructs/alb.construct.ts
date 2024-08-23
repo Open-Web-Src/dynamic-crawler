@@ -3,7 +3,6 @@ import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
-import { EcsFargateConstruct } from "@constructs";
 
 interface AlbConstructProps {
   vpc: ec2.IVpc;

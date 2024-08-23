@@ -8,7 +8,6 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const app = new cdk.App();
-
 new MainStack(app, "MainStack");
 
 app.synth();

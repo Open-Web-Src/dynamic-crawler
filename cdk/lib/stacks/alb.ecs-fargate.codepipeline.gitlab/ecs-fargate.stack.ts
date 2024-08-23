@@ -8,7 +8,6 @@ import * as ecr from "aws-cdk-lib/aws-ecr";
 import { aws_logs as logs } from "aws-cdk-lib";
 import {
   EcsFargateConstruct,
-  VpcConstruct,
   SecurityGroupConstruct,
   IamRoleConstruct,
 } from "@constructs";

@@ -17,10 +17,6 @@ export class PipelineStack extends cdk.Stack {
     super(scope, id, props);
 
     new PipelineConstruct(this, "PipelineConstruct", {
-      services: Object.keys(props.services).reduce((acc, key) => {
-        acc[key] = props.services[key].service;
-        return acc;
-      }, {} as { [key: string]: cdk.aws_ecs.FargateService }),
       sourceConfig: {
         type: "GitLab",
         gitRepo: process.env.GITLAB_REPO!,
@@ -42,6 +38,35 @@ export class PipelineStack extends cdk.Stack {
         REDIS_CONTAINER_NAME: process.env.REDIS_CONTAINER_NAME!,
         REDIS_LOGGING_CONTAINER_NAME: process.env.REDIS_LOGGING_CONTAINER_NAME!,
       },
+      deploymentStages: [
+        {
+          stageName: "Dependencies",
+          services: {
+            redis: props.services["redis"].service,
+            selenium: props.services["selenium"].service,
+          },
+        },
+        {
+          stageName: "Crawler",
+          services: {
+            crawler_main: props.services["crawler_main"].service,
+            crawler_replica: props.services["crawler_replica"].service,
+          },
+        },
+        {
+          stageName: "BackendAndMonitoring",
+          services: {
+            flaskapp: props.services["flaskapp"].service,
+            redis_logging: props.services["redis_logging"].service,
+          },
+        },
+        {
+          stageName: "Frontend",
+          services: {
+            reactapp: props.services["reactapp"].service,
+          },
+        },
+      ],
     });
   }
 }

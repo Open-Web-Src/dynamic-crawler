@@ -58,11 +58,18 @@ def log_to_cloudwatch(queue_length):
 def log_queue_length():
     """Logs the queue length either to a file (dev) or CloudWatch (pro)."""
     while True:
-        queue_length = redis_client.llen(REDIS_QUEUE_NAME)
-        if ENV == 'dev':
-            log_to_file(queue_length)
-        elif ENV == 'pro':
-            log_to_cloudwatch(queue_length)
+        try:
+            queue_length = redis_client.llen(REDIS_QUEUE_NAME)
+            if ENV == 'dev':
+                log_to_file(queue_length)
+            elif ENV == 'pro':
+                log_to_cloudwatch(queue_length)
+        except redis.ConnectionError as e:
+            error_message = f"Redis connection error: {str(e)}"
+            print(error_message)
+        except Exception as e:
+            error_message = f"Unexpected error: {str(e)}"
+            print(error_message)
         time.sleep(5)
 
 

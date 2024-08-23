@@ -6,10 +6,20 @@ import { SecurityGroupsStack } from "./security-groups.stack";
 import { EcsFargateClusterStack } from "./ecs-fargate.stack";
 import { AlbStack } from "./alb.stack";
 import { PipelineStack } from "./pipeline.stack";
+import * as dotenv from "dotenv";
+
+// Load environment variables from .env file
+dotenv.config();
 
 export class MainStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
+    super(scope, id, {
+      ...props,
+      env: {
+        account: process.env.ACCOUNT_ID,
+        region: process.env.AWS_DEFAULT_REGION,
+      },
+    });
 
     // Load an existing VPC by its ID or other criteria
     const vpc = ec2.Vpc.fromLookup(this, "ExistingVpc", {
