@@ -54,42 +54,6 @@ export class SecurityGroupsStack extends cdk.Stack {
       }
     );
 
-    // CRAWLER
-    this.crawlerSecurityGroup = new SecurityGroupConstruct(this, "CrawlerSG", {
-      vpc: props.vpc,
-      description: "Security group for Crawler",
-    });
-
-    // REDIS
-    this.redisSecurityGroup = new SecurityGroupConstruct(this, "RedisSG", {
-      vpc: props.vpc,
-      description: "Security group for Redis",
-      ingressRules: [
-        {
-          peer: this.crawlerSecurityGroup.securityGroup,
-          connection: cdk.aws_ec2.Port.allTraffic(),
-          description: "Allow all traffic from Crawler",
-        },
-      ],
-    });
-
-    // SELENIUM
-    this.seleniumSecurityGroup = new SecurityGroupConstruct(
-      this,
-      "SeleniumSG",
-      {
-        vpc: props.vpc,
-        description: "Security group for Selenium",
-        ingressRules: [
-          {
-            peer: this.crawlerSecurityGroup.securityGroup,
-            connection: cdk.aws_ec2.Port.allTraffic(),
-            description: "Allow all traffic from Crawler",
-          },
-        ],
-      }
-    );
-
     // FLASK_APP
     this.flaskappSecurityGroup = new SecurityGroupConstruct(
       this,
@@ -102,11 +66,6 @@ export class SecurityGroupsStack extends cdk.Stack {
             peer: this.reactappSecurityGroup.securityGroup,
             connection: cdk.aws_ec2.Port.tcp(5001),
             description: "Allow TCP(5001) traffic from React",
-          },
-          {
-            peer: this.crawlerSecurityGroup.securityGroup,
-            connection: cdk.aws_ec2.Port.tcp(5001),
-            description: "Allow TCP(5001) traffic from Crawler",
           },
         ],
       }

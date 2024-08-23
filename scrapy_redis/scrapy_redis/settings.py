@@ -1,6 +1,6 @@
 import os
 
-# Scrapy settings for scrapy_rt project
+# Scrapy settings for scrapy_redis project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -9,10 +9,10 @@ import os
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = "scrapy_rt"
+BOT_NAME = "scrapy_redis"
 
-SPIDER_MODULES = ["scrapy_rt.spiders"]
-NEWSPIDER_MODULE = "scrapy_rt.spiders"
+SPIDER_MODULES = ["scrapy_redis.spiders"]
+NEWSPIDER_MODULE = "scrapy_redis.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
@@ -48,14 +48,14 @@ TELNETCONSOLE_ENABLED = False
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 # SPIDER_MIDDLEWARES = {
-#    "scrapy_rt.middlewares.ScrapyRtSpiderMiddleware": 543,
+#    "scrapy_redis.middlewares.ScrapyRtSpiderMiddleware": 543,
 # }
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-    "scrapy_rt.middlewares.ExtendedCloudFlareMiddleware": 543,
-    # "scrapy_rt.middlewares.ScrapyRtDownloaderMiddleware": 543,
+    "scrapy_redis.middlewares.ExtendedCloudFlareMiddleware": 543,
+    # "scrapy_redis.middlewares.ScrapyRtDownloaderMiddleware": 543,
 }
 
 # Enable or disable extensions
@@ -67,8 +67,8 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    "scrapy_rt.pipelines.ScrapyRtPipeline": 300,
-    "scrapy_rt.pipelines.MongoDBPineline": 400,
+    "scrapy_redis.pipelines.ScrapyRtPipeline": 300,
+    "scrapy_redis.pipelines.MongoDBPineline": 400,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

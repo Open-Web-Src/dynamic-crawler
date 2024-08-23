@@ -37,16 +37,6 @@ export class MainStack extends cdk.Stack {
       "FlaskAppRepo",
       "flaskapp"
     );
-    const crawlerRepo = ecr.Repository.fromRepositoryName(
-      this,
-      "CrawlerRepo",
-      "crawler"
-    );
-    const redisLoggingRepo = ecr.Repository.fromRepositoryName(
-      this,
-      "RedisLoggingRepo",
-      "redis_logging"
-    );
 
     const sgStack = new SecurityGroupsStack(this, "SecurityGroupsStack", {
       vpc,
@@ -59,13 +49,8 @@ export class MainStack extends cdk.Stack {
         vpc,
         reactappSecurityGroup: sgStack.reactappSecurityGroup,
         flaskappSecurityGroup: sgStack.flaskappSecurityGroup,
-        crawlerSecurityGroup: sgStack.crawlerSecurityGroup,
-        redisSecurityGroup: sgStack.redisSecurityGroup,
-        seleniumSecurityGroup: sgStack.seleniumSecurityGroup,
         reactappRepo,
         flaskappRepo,
-        crawlerRepo,
-        redisLoggingRepo,
       }
     );
 
@@ -77,13 +62,8 @@ export class MainStack extends cdk.Stack {
 
     new PipelineStack(this, "PipelineStack", {
       services: {
-        crawler_main: ecsClusterStack.crawlerMainService,
-        crawler_replica: ecsClusterStack.crawlerReplicaService,
         flaskapp: ecsClusterStack.flaskappService,
         reactapp: ecsClusterStack.reactappService,
-        redis: ecsClusterStack.redisService,
-        selenium: ecsClusterStack.seleniumService,
-        redis_logging: ecsClusterStack.redisLoggingService,
       },
     });
   }

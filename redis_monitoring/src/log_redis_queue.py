@@ -33,6 +33,7 @@ def log_to_file(queue_length):
 
 def log_to_cloudwatch(queue_length):
     """Pushes the queue length to AWS CloudWatch in production environment."""
+    print(f"queue_length: {queue_length}")
     try:
         cloudwatch_client = boto3.client('cloudwatch', region_name=AWS_REGION)
         cloudwatch_client.put_metric_data(
@@ -48,7 +49,8 @@ def log_to_cloudwatch(queue_length):
                     ],
                     'Value': queue_length,
                     'Unit': 'Count',
-                    'StorageResolution': 30  # 30 second resolution for high resolution metrics
+                    # 1 (High Resolution) | 60 (Standard Resolution)
+                    'StorageResolution': 1
                 },
             ]
         )
@@ -71,7 +73,7 @@ def log_queue_length():
         except Exception as e:
             error_message = f"Unexpected error: {str(e)}"
             print(error_message)
-        time.sleep(30)
+        time.sleep(10)
 
 
 if __name__ == '__main__':

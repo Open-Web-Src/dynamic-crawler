@@ -14,7 +14,6 @@ import {
 
 interface EcsClusterStackProps extends cdk.StackProps {
   vpc: ec2.IVpc;
-  albSecurityGroup: SecurityGroupConstruct;
   reactappSecurityGroup: SecurityGroupConstruct;
   flaskappSecurityGroup: SecurityGroupConstruct;
   crawlerSecurityGroup: SecurityGroupConstruct;
