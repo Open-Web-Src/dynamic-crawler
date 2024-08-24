@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
-import { MainStack } from "@stacks/alb.ecs-fargate.codepipeline.gitlab/main.stack";
+import { MainStack } from "@stacks/alb.ecs-fargate.codepipeline.gitlab.x-ray/main.stack";
 import * as dotenv from "dotenv";
 
 // Load environment variables from .env file

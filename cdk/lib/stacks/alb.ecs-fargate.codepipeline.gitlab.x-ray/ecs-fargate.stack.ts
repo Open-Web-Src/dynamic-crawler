@@ -74,6 +74,7 @@ export class EcsFargateClusterStack extends cdk.Stack {
       serviceDiscoveryNamespace: namespace,
       serviceName: "reactapp",
       logRetention: logs.RetentionDays.ONE_WEEK,
+      xrayEnabled: true,
     });
 
     // FLASK_APP
@@ -101,6 +102,7 @@ export class EcsFargateClusterStack extends cdk.Stack {
       serviceDiscoveryNamespace: namespace,
       serviceName: "flaskapp",
       logRetention: logs.RetentionDays.ONE_WEEK,
+      xrayEnabled: true,
     });
   }
 }

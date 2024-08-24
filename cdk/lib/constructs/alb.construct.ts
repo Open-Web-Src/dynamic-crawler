@@ -1,12 +1,17 @@
+import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import * as iam from "aws-cdk-lib/aws-iam";
+import { S3Construct } from "@constructs";
 
 interface AlbConstructProps {
   vpc: ec2.IVpc;
   securityGroup: ec2.SecurityGroup;
+  xrayEnabled?: boolean; // Enable X-Ray tracing
+  accessLogsEnabled?: boolean; // Enable access logging to S3
 }
 
 export class AlbConstruct extends Construct {
@@ -19,7 +24,30 @@ export class AlbConstruct extends Construct {
       vpc: props.vpc,
       internetFacing: true,
       securityGroup: props.securityGroup,
+      ...(props.xrayEnabled ? { accessLogsPrefix: "alb-xray" } : {}),
     });
+
+    // Enable Access Logs if specified
+    if (props.accessLogsEnabled) {
+      const accessLogsBucket = new S3Construct(this, "AccessLogsBucket", {
+        bucketName: `alb-access-logs-${cdk.Names.uniqueId(this)}`,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        autoDeleteObjects: true,
+      });
+
+      this.alb.logAccessLogs(accessLogsBucket.bucket);
+    }
+
+    // Enable X-Ray tracing if specified
+    if (props.xrayEnabled) {
+      // Attach the X-Ray policy to the load balancer's role
+      const xrayPolicy = new iam.PolicyStatement({
+        actions: ["xray:PutTraceSegments", "xray:PutTelemetryRecords"],
+        resources: ["*"],
+      });
+      const lbRole = this.alb.node.tryFindChild("DefaultPolicy") as iam.Role;
+      lbRole?.addToPrincipalPolicy(xrayPolicy);
+    }
   }
 
   public addListener(

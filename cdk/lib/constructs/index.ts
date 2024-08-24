@@ -7,3 +7,4 @@ export * from "./security-group.construct";
 export * from "./alb.construct";
 export * from "./pipeline.construct";
 export * from "./ec2.construct";
+export * from "./s3.construct";

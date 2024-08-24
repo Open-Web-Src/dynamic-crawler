@@ -2,7 +2,6 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as ecr from "aws-cdk-lib/aws-ecr";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
-import * as xray from "aws-cdk-lib/aws-xray";
 import { SecurityGroupsStack } from "./security-groups.stack";
 import { EcsFargateClusterStack } from "./ecs-fargate.stack";
 import { AlbStack } from "./alb.stack";
@@ -38,6 +37,16 @@ export class MainStack extends cdk.Stack {
       "FlaskAppRepo",
       "flaskapp"
     );
+    const crawlerRepo = ecr.Repository.fromRepositoryName(
+      this,
+      "CrawlerRepo",
+      "crawler"
+    );
+    const redisLoggingRepo = ecr.Repository.fromRepositoryName(
+      this,
+      "RedisLoggingRepo",
+      "redis_logging"
+    );
 
     const sgStack = new SecurityGroupsStack(this, "SecurityGroupsStack", {
       vpc,
@@ -50,8 +59,13 @@ export class MainStack extends cdk.Stack {
         vpc,
         reactappSecurityGroup: sgStack.reactappSecurityGroup,
         flaskappSecurityGroup: sgStack.flaskappSecurityGroup,
+        crawlerSecurityGroup: sgStack.crawlerSecurityGroup,
+        redisSecurityGroup: sgStack.redisSecurityGroup,
+        seleniumSecurityGroup: sgStack.seleniumSecurityGroup,
         reactappRepo,
         flaskappRepo,
+        crawlerRepo,
+        redisLoggingRepo,
       }
     );
 
@@ -61,28 +75,16 @@ export class MainStack extends cdk.Stack {
       reactappService: ecsClusterStack.reactappService,
     });
 
-    // Create a custom X-Ray sampling rule
-    new xray.CfnSamplingRule(this, "MyCustomSamplingRule", {
-      samplingRule: {
-        ruleName: "MyCustomRule",
-        priority: 1,
-        fixedRate: 0.05,
-        reservoirSize: 10,
-        serviceName: "*", // or specify a service name
-        serviceType: "*",
-        resourceArn: "*", // Correct property name
-        host: "*",
-        httpMethod: "*",
-        urlPath: "*",
-        version: 1,
+    new PipelineStack(this, "PipelineStack", {
+      services: {
+        crawler_main: ecsClusterStack.crawlerMainService,
+        crawler_replica: ecsClusterStack.crawlerReplicaService,
+        flaskapp: ecsClusterStack.flaskappService,
+        reactapp: ecsClusterStack.reactappService,
+        redis: ecsClusterStack.redisService,
+        selenium: ecsClusterStack.seleniumService,
+        redis_logging: ecsClusterStack.redisLoggingService,
       },
     });
-
-    // new PipelineStack(this, "PipelineStack", {
-    //   services: {
-    //     flaskapp: ecsClusterStack.flaskappService,
-    //     reactapp: ecsClusterStack.reactappService,
-    //   },
-    // });
   }
 }

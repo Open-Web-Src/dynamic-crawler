@@ -49,8 +49,8 @@ def log_to_cloudwatch(queue_length):
                     ],
                     'Value': queue_length,
                     'Unit': 'Count',
-                    # 1 (High Resolution) | 60 (Standard Resolution)
-                    'StorageResolution': 1
+                    # 1 - High Resolution | 60 (Default) - Standard Resolution
+                    'StorageResolution': 60
                 },
             ]
         )
@@ -73,7 +73,7 @@ def log_queue_length():
         except Exception as e:
             error_message = f"Unexpected error: {str(e)}"
             print(error_message)
-        time.sleep(10)
+        time.sleep(60)
 
 
 if __name__ == '__main__':

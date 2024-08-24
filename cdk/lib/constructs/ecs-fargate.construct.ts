@@ -33,6 +33,7 @@ interface EcsFargateConstructProps {
     command?: string[];
     logRetention?: logs.RetentionDays;
   }[];
+  xrayEnabled?: boolean;
 }
 
 export class EcsFargateConstruct extends Construct {
@@ -40,6 +41,14 @@ export class EcsFargateConstruct extends Construct {
 
   constructor(scope: Construct, id: string, props: EcsFargateConstructProps) {
     super(scope, id);
+
+    // Update taskRole if X-Ray is enabled
+    if (props.xrayEnabled) {
+      // Add AWSXRayDaemonWriteAccess policy to the taskRole
+      props.taskRole.addManagedPolicy(
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AWSXRayDaemonWriteAccess")
+      );
+    }
 
     const taskDefinition = new ecs.FargateTaskDefinition(this, "TaskDef", {
       memoryLimitMiB: props.memoryLimitMiB ?? 512,
@@ -86,6 +95,29 @@ export class EcsFargateConstruct extends Construct {
           command: containerProps.command,
         });
       }
+    }
+
+    // Integrate the X-Ray daemon
+    if (props.xrayEnabled) {
+      taskDefinition.addContainer("XRayDaemon", {
+        image: ecs.ContainerImage.fromRegistry("amazon/aws-xray-daemon"),
+        environment: {
+          AWS_XRAY_DAEMON_ADDRESS: "0.0.0.0:2000",
+          AWS_XRAY_TRACING_NAME: props.serviceName!,
+        },
+        logging: ecs.LogDrivers.awsLogs({
+          streamPrefix: `${props.serviceName}-xray`,
+          logRetention: props.logRetention ?? logs.RetentionDays.ONE_DAY,
+        }),
+        essential: true,
+        portMappings: [
+          {
+            containerPort: 2000,
+            protocol: ecs.Protocol.UDP,
+          },
+        ],
+        command: ["-o"], // Use the local mode flag in Fargate
+      });
     }
 
     this.service = new ecs.FargateService(this, "Service", {
