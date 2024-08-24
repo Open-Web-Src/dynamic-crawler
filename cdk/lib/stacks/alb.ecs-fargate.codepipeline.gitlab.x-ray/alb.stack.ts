@@ -22,6 +22,8 @@ export class AlbStack extends cdk.Stack {
     const alb = new AlbConstruct(this, "AlbConstruct", {
       vpc: props.vpc,
       securityGroup: props.albSecurityGroup.securityGroup,
+      xrayEnabled: true,
+      accessLogsEnabled: false,
     });
 
     // HTTPS Listener (port 443)

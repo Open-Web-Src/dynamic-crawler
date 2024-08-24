@@ -47,23 +47,11 @@ export class PipelineStack extends cdk.Stack {
           },
         },
         {
-          stageName: "Crawler",
+          stageName: "Crawler&Monitoring",
           services: {
             crawler_main: props.services["crawler_main"].service,
             crawler_replica: props.services["crawler_replica"].service,
-          },
-        },
-        {
-          stageName: "BackendAndMonitoring",
-          services: {
-            flaskapp: props.services["flaskapp"].service,
             redis_logging: props.services["redis_logging"].service,
-          },
-        },
-        {
-          stageName: "Frontend",
-          services: {
-            reactapp: props.services["reactapp"].service,
           },
         },
       ],

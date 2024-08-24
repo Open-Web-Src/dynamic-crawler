@@ -5,8 +5,8 @@ from routes import app_bp
 from init_db import initialize_configuration
 from modules.auth.auth import register_error_handlers, register_before_request
 from flask_cors import CORS
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
+# from aws_xray_sdk.core import xray_recorder
+# from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
 
 
 app = Flask(__name__)
@@ -17,8 +17,8 @@ CORS(app, supports_credentials=True, allow_headers=[
      "Authorization", "X-Requested-With", "Content-Type", "Accept"])
 
 # Register X-Ray middleware
-xray_recorder.configure(service='FlaskApp')  # Set a name for the service
-XRayMiddleware(app, xray_recorder)
+# xray_recorder.configure(service='FlaskApp')  # Set a name for the service
+# XRayMiddleware(app, xray_recorder)
 
 register_error_handlers(app)
 register_before_request(app)

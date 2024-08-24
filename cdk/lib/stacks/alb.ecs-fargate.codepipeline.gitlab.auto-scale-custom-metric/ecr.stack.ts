@@ -9,14 +9,6 @@ export class EcrStack extends cdk.Stack {
     super(scope, id, props);
 
     this.repositories = {
-      flaskapp: new EcrConstruct(this, "FlaskAppRepo", {
-        repositoryName: "flaskapp",
-        ssmParameterName: "/ecr/flaskapp_repo_uri",
-      }),
-      reactapp: new EcrConstruct(this, "ReactAppRepo", {
-        repositoryName: "reactapp",
-        ssmParameterName: "/ecr/reactapp_repo_uri",
-      }),
       crawler: new EcrConstruct(this, "CrawlerRepo", {
         repositoryName: "crawler",
         ssmParameterName: "/ecr/crawler_repo_uri",

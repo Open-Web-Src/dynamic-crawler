@@ -74,7 +74,6 @@ export class EcsFargateClusterStack extends cdk.Stack {
       serviceDiscoveryNamespace: namespace,
       serviceName: "reactapp",
       logRetention: logs.RetentionDays.ONE_WEEK,
-      xrayEnabled: true,
     });
 
     // FLASK_APP
@@ -92,6 +91,8 @@ export class EcsFargateClusterStack extends cdk.Stack {
         DATABASE: process.env.DATABASE!,
         COLLECTION: process.env.COLLECTION!,
         BATCH_SIZE: process.env.BATCH_SIZE!,
+        AWS_XRAY_DAEMON_ADDRESS: process.env.AWS_XRAY_DAEMON_ADDRESS!,
+        AWS_XRAY_TRACING_NAME: process.env.AWS_XRAY_TRACING_NAME_FLASKAPP!,
       },
       secrets: {
         USERNAME: ecs.Secret.fromSecretsManager(appSecret, "USERNAME"),

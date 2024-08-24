@@ -7,10 +7,6 @@ export class SecurityGroupsStack extends cdk.Stack {
   public readonly albSecurityGroup: SecurityGroupConstruct;
   public readonly reactappSecurityGroup: SecurityGroupConstruct;
   public readonly flaskappSecurityGroup: SecurityGroupConstruct;
-  public readonly crawlerSecurityGroup: SecurityGroupConstruct;
-  public readonly redisSecurityGroup: SecurityGroupConstruct;
-  public readonly seleniumSecurityGroup: SecurityGroupConstruct;
-  public readonly gitlabRunnerSecurityGroup: SecurityGroupConstruct;
 
   constructor(
     scope: Construct,

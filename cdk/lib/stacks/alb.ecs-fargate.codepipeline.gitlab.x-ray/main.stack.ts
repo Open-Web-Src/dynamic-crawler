@@ -78,11 +78,11 @@ export class MainStack extends cdk.Stack {
       },
     });
 
-    // new PipelineStack(this, "PipelineStack", {
-    //   services: {
-    //     flaskapp: ecsClusterStack.flaskappService,
-    //     reactapp: ecsClusterStack.reactappService,
-    //   },
-    // });
+    new PipelineStack(this, "PipelineStack", {
+      services: {
+        flaskapp: ecsClusterStack.flaskappService,
+        reactapp: ecsClusterStack.reactappService,
+      },
+    });
   }
 }
