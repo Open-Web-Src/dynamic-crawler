@@ -8,3 +8,6 @@ export * from "./alb.construct";
 export * from "./pipeline.construct";
 export * from "./ec2.construct";
 export * from "./s3.construct";
+export * from "./cloudwatch-alarm.construct";
+export * from "./cloudwatch-composite-alarm.construct";
+export * from "./lambda.construct";

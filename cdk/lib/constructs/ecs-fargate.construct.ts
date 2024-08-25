@@ -1,10 +1,30 @@
+import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecr from "aws-cdk-lib/aws-ecr";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
 import * as servicediscovery from "aws-cdk-lib/aws-servicediscovery";
+import * as applicationautoscaling from "aws-cdk-lib/aws-applicationautoscaling";
 import { aws_logs as logs } from "aws-cdk-lib";
+
+interface MetricScalingOption {
+  namespace: string;
+  metricName: string;
+  dimensionsMap?: { [key: string]: string };
+  period?: cdk.Duration;
+  statistic?: string;
+  adjustmentType?: applicationautoscaling.AdjustmentType;
+  scalingSteps?: applicationautoscaling.ScalingInterval[];
+  evaluationPeriods?: number;
+}
+
+interface ScalingOptions {
+  minCapacity?: number;
+  maxCapacity?: number;
+  metrics?: MetricScalingOption[]; // Array of metrics for scaling
+}
 
 interface EcsFargateConstructProps {
   cluster: ecs.Cluster;
@@ -34,6 +54,7 @@ interface EcsFargateConstructProps {
     logRetention?: logs.RetentionDays;
   }[];
   xrayEnabled?: boolean;
+  scalingOptions?: ScalingOptions;
 }
 
 export class EcsFargateConstruct extends Construct {
@@ -133,5 +154,42 @@ export class EcsFargateConstruct extends Construct {
           }
         : undefined,
     });
+
+    // Apply scaling options if provided
+    if (props.scalingOptions) {
+      this.applyScaling(props.scalingOptions);
+    }
+  }
+
+  private applyScaling(options: ScalingOptions) {
+    const scaling = this.service.autoScaleTaskCount({
+      minCapacity: options.minCapacity ?? 1,
+      maxCapacity: options.maxCapacity ?? 10,
+    });
+
+    if (options.metrics) {
+      for (const metricOption of options.metrics) {
+        const metric = new cloudwatch.Metric({
+          namespace: metricOption.namespace,
+          metricName: metricOption.metricName,
+          dimensionsMap: metricOption.dimensionsMap,
+          period: metricOption.period ?? cdk.Duration.minutes(1),
+          statistic: metricOption.statistic ?? cloudwatch.Stats.AVERAGE,
+        });
+
+        scaling.scaleOnMetric(`ScalingFor${metricOption.metricName}`, {
+          metric,
+          adjustmentType:
+            metricOption.adjustmentType ??
+            applicationautoscaling.AdjustmentType.CHANGE_IN_CAPACITY,
+          scalingSteps: metricOption.scalingSteps ?? [
+            { upper: 0, change: -1 },
+            { lower: 1, change: +1 },
+            { lower: 10, change: +2 },
+          ],
+          evaluationPeriods: metricOption.evaluationPeriods ?? 1,
+        });
+      }
+    }
   }
 }

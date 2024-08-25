@@ -47,7 +47,7 @@ export class PipelineStack extends cdk.Stack {
           },
         },
         {
-          stageName: "Crawler&Monitoring",
+          stageName: "CrawlerAndMonitoring",
           services: {
             crawler_main: props.services["crawler_main"].service,
             crawler_replica: props.services["crawler_replica"].service,

@@ -54,6 +54,19 @@ export class MainStack extends cdk.Stack {
       }
     );
 
+    // const lambdaConstruct = new LambdaConstruct(this, "LambdaConstruct", {
+    //   ecsClusterName: ecsClusterStack.crawlerMainService.service.cluster.clusterName,
+    //   ecsServiceName: ecsClusterStack.crawlerMainService.service.serviceName,
+    // });
+
+    // new AlarmStack(this, "AlarmStack", {
+    //   queueLengthMetricName: process.env.CLOUDWATCH_METRIC_NAME!,
+    //   cpuMetricName: "CPUUtilization",
+    //   namespace: process.env.CLOUDWATCH_NAMESPACE!,
+    //   dimensionsMap: { "AutoScalingGroupName": ecsClusterStack.crawlerMainService.service.serviceName },
+    //   ecsServiceArn: lambdaConstruct.function.functionArn,
+    // });
+
     new PipelineStack(this, "PipelineStack", {
       services: {
         crawler_main: ecsClusterStack.crawlerMainService,
